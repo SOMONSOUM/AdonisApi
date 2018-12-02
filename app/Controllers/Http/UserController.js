@@ -19,8 +19,9 @@ class UserController {
         return this.login(...arguments)
     }
 
-    async index() {
-        const users = await User.all()
+    async index({ auth }) {
+        // const users = await User.all()
+        const users = await auth.getUser()
         return users
     }
 }

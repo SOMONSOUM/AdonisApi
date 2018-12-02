@@ -22,6 +22,8 @@ Route.group(() => {
 
   Route.post('auth/register', 'UserController.register')
   Route.post('auth/login', 'UserController.login')
-  Route.get('/users', 'UserController.index')
+  Route.get('users', 'UserController.index').middleware('auth')
+  Route.get('events', 'EventController.index')
+  Route.post('events', 'EventController.create').middleware('auth')
 
 }).prefix('api')
