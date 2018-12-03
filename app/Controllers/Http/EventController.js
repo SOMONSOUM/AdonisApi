@@ -1,23 +1,15 @@
 'use strict'
 
 const Event = use('App/Models/Event')
+const AuthorizationService = use('App/Services/AuthorizationService')
+const FindingService = use('App/Services/FindingService')
 
 class EventController {
   /**
    * Show a list of all events.
    * GET events
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   * @param {View} ctx.view
    */
-  async index({ request, response, auth }) {
-    /* Need to authenticate user */
-    /* const user = await auth.getUser()
-    return await user.events().fetch() */
-
-    /* No need to authenticate */
+  async index() {
     const events = await Event.all()
     return events
   }
@@ -28,39 +20,12 @@ class EventController {
    *
    * @param {object} ctx
    * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   * @param {View} ctx.view
+   * @param {auth} ctx.auth
    */
-  async create({ request, auth }) {
+  async create({ params, auth }) {
     const user = await auth.getUser()
-
-    const {
-      name,
-      organizer,
-      url,
-      place,
-      event_date,
-      meetup_num,
-      desc } = request.all()
-
-    const event = new Event()
-    /* event.name = name
-    event.organizer = organizer
-    event.url = url
-    event.place = place
-    event.event_date = event_date
-    event.meet_num = meet_num
-    event.desc = desc */
-    event.fill({
-      name,
-      organizer,
-      url,
-      place,
-      event_date,
-      meetup_num,
-      desc
-    })
-    await user.events().save(event)
+    const event = await Event.find(params.id)
+    AuthorizationService.verifyPermission(event, user)
     return event
   }
 
@@ -70,9 +35,21 @@ class EventController {
    *
    * @param {object} ctx
    * @param {Request} ctx.request
-   * @param {Response} ctx.response
+   * @param {auth} ctx.auth
    */
-  async store({ request, response }) {
+  async store({ request, auth }) {
+    const user = await auth.getUser()
+
+    const {
+      name, organizer, url, place, event_date, meetup_num, desc
+    } = request.all()
+
+    const event = new Event()
+    event.fill({
+      name, organizer, url, place, event_date, meetup_num, desc
+    })
+    await user.events().save(event)
+    return event
   }
 
   /**
@@ -80,11 +57,11 @@ class EventController {
    * GET events/:id
    *
    * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   * @param {View} ctx.view
    */
-  async show({ params, request, response, view }) {
+  async show({ params }) {
+    const event = await Event.find(params.id)
+    FindingService.verifyFinding(event)
+    return event
   }
 
   /**
@@ -92,11 +69,13 @@ class EventController {
    * GET events/:id/edit
    *
    * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   * @param {View} ctx.view
+   * @param {auth} ctx.auth
    */
-  async edit({ params, request, response, view }) {
+  async edit({ params, auth }) {
+    const user = await auth.getUser()
+    const event = await Event.find(params.id)
+    AuthorizationService.verifyPermission(event, user)
+    return event
   }
 
   /**
@@ -105,9 +84,16 @@ class EventController {
    *
    * @param {object} ctx
    * @param {Request} ctx.request
-   * @param {Response} ctx.response
+   * @param {auth} ctx.auth
    */
-  async update({ params, request, response }) {
+  async update({ params, request, auth }) {
+    const user = await auth.getUser()
+    const event = await Event.find(params.id)
+
+    AuthorizationService.verifyPermission(event, user)
+    event.merge(request.all())
+    await event.save()
+    return event
   }
 
   /**
@@ -115,10 +101,15 @@ class EventController {
    * DELETE events/:id
    *
    * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
+   * @param {auth} ctx.auth
    */
-  async destroy({ params, request, response }) {
+  async destroy({ params, auth }) {
+    const user = await auth.getUser()
+    const event = await Event.find(params.id)
+
+    AuthorizationService.verifyPermission(event, user)
+    await event.delete()
+    return event
   }
 }
 

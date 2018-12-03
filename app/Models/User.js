@@ -43,6 +43,15 @@ class User extends Model {
   events() {
     return this.hasMany('App/Models/Event')
   }
+
+  /**
+ * @method speakers
+ *
+ * @return {Object}
+ */
+  speakers() {
+    return this.hasMany('App/Models/Speaker')
+  }
 }
 
 module.exports = User

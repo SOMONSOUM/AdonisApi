@@ -16,14 +16,24 @@
 /** @type {typeof import('@adonisjs/framework/src/Route/Manager')} */
 const Route = use('Route')
 
-Route.get('/', 'UserController.getUsers')
-
 Route.group(() => {
 
   Route.post('auth/register', 'UserController.register')
   Route.post('auth/login', 'UserController.login')
-  Route.get('users', 'UserController.index').middleware('auth')
-  Route.get('events', 'EventController.index')
-  Route.post('events', 'EventController.create').middleware('auth')
+  Route.get('users', 'UserController.index')
+  // Route.get('events', 'EventController.index')
+  // Route.get('event/:id', 'EventController.show')
+  // Route.get('event/:id/edit', 'EventController.edit').middleware(['auth'])
+  // Route.patch('event/:id', 'EventController.update').middleware(['auth'])
+  // Route.post('events', 'EventController.create').middleware(['auth'])
+  // Route.delete('events/:id', 'EventController.destroy').middleware(['auth'])
+  Route.resource('events', 'EventController')
+    .middleware(new Map([
+      [['store', 'update', 'destroy'], ['auth']]
+    ]))
+  Route.resource('speakers', 'SpeakerController')
+    .middleware(new Map([
+      [['store', 'update', 'destroy'], ['auth']]
+    ]))
 
 }).prefix('api')

@@ -1,4 +1,5 @@
 'use strict'
+
 const User = use('App/Models/User')
 
 class UserController {
@@ -12,16 +13,14 @@ class UserController {
     async register({ request }) {
         const { email, username, password } = request.all()
         await User.create({
-            email,
-            password,
-            username,
+            email, password, username,
         })
         return this.login(...arguments)
     }
 
     async index({ auth }) {
-        // const users = await User.all()
-        const users = await auth.getUser()
+        const users = await User.all()
+        // const users = await auth.getUser()
         return users
     }
 }
